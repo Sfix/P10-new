@@ -1,0 +1,41 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      - id: check-docstring-first
+      - id: check-merge-conflict
+      - id: trailing-whitespace
+        exclude: (?x)(Notebooks/)
+      - id: end-of-file-fixer
+        exclude: (?x)(Notebooks/)
+      - id: check-yaml
+      - id: check-ast
+      - id: check-case-conflict
+      - id: check-json
+      - id: detect-private-key
+
+  - repo: https://github.com/psf/black
+    rev: 21.9b0
+    hooks:
+      - id: black
+        language_version: python3.8
+        exclude: (?x)(Notebooks/|fly_me_bot/)
+
+# To be put in comment when git. Can be used with pre-commit run --all-files
+  # - repo: local
+  #   hooks:
+  #     - id: pylint
+  #       name: pylint
+  #       entry: '"C:\Users\serge\OneDrive\Data Sciences\Data Sciences - Ingenieur IA\10e projet\Deliverables\.venv\Scripts\pylint.exe"'
+  #       language: python
+  #       types: [python]
+  #       exclude: (?x)(Notebooks/|fly_me_bot/)
+
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: '"C:\Users\serge\OneDrive\Data Sciences\Data Sciences - Ingenieur IA\10e projet\Deliverables\.venv\Scripts\pytest.exe"'
+        pass_filenames: false
+        language: system
