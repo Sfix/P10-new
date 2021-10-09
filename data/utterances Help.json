@@ -1,0 +1,14 @@
+{
+    "data" : [
+        {
+            "text": "what are the instructions ?",
+            "intent": "Help",
+            "entities": []
+        },
+        {
+            "text": "help",
+            "intent": "Help",
+            "entities": []
+        }
+    ]
+}

@@ -27,6 +27,8 @@ from shared_code.frames.frames import Frames
 with open(file=FILES.FRAME_RAW_DATA, mode="r", encoding="utf-8") as handler:
     raw_data = json.load(handler)
 df_raw = pd.DataFrame(raw_data)
+frame = Frames()
+df_utterances = frame.df_utterances()
 
 # %% [markdown]
 # Decode

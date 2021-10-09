@@ -167,7 +167,7 @@ class Frames:
         return self.__df_utterances
 
 
-# Create a mean for debug
+# Element for debug
 if __name__ == "__main__":
     frame = Frames()
     print(len(frame))

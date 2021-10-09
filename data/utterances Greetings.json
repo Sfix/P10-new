@@ -1,0 +1,34 @@
+{
+    "data" : [
+        {
+            "text": "hi",
+            "intent": "Greetings",
+            "entities": []
+        },
+        {
+            "text": "hey",
+            "intent": "Greetings",
+            "entities": []
+        },
+        {
+            "text": "hello",
+            "intent": "Greetings",
+            "entities": []
+        },
+        {
+            "text": "good morning",
+            "intent": "Greetings",
+            "entities": []
+        },
+        {
+            "text": "good afternoon",
+            "intent": "Greetings",
+            "entities": []
+        },
+        {
+            "text": "good evening",
+            "intent": "Greetings",
+            "entities": []
+        }
+    ]
+}
