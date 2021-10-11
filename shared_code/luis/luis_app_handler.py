@@ -21,7 +21,7 @@ class Luis_app_handler:
     def __init__(self) -> None:
         """Init the class."""
         self.__df_utterances: Frames = Frames()
-        self.__json: json = None
+        self.__json: json = self.create_json_for_new_app()
 
     #
     # Private
@@ -54,7 +54,7 @@ class Luis_app_handler:
             "intents": [
                 {"name": LUIS_APPS.INTENTS["Greetings name"], "features": []},
                 {
-                    "name": LUIS_APPS.INTENTS["Specify Journey Name"],
+                    "name": LUIS_APPS.INTENTS["Specify journey name"],
                     "features": [
                         {
                             "modelName": LUIS_APPS.ENTITIES["From place name"],
@@ -78,7 +78,7 @@ class Luis_app_handler:
                         },
                     ],
                 },
-                {"name": LUIS_APPS.INTENTS["Help"], "features": []},
+                {"name": LUIS_APPS.INTENTS["Help name"], "features": []},
                 {"name": "None", "features": []},
             ]
         }
@@ -97,7 +97,7 @@ class Luis_app_handler:
                     "roles": [],
                     "features": [
                         {
-                            "featureName": LUIS_APPS.FEATURES["origine phrases list"][
+                            "featureName": LUIS_APPS.FEATURES["origin phrases list"][
                                 "name"
                             ],
                             "isRequired": False,
@@ -196,6 +196,38 @@ class Luis_app_handler:
             ]
         }
 
+    def __create_json_utterances(self) -> json:
+        """Create the utterances part of the json.
+
+        Returns:
+            json: utterances part of the json.
+        """
+        json_utterances = {"utterances": []}
+        # Create for the intent Greetings
+        with open(file=FILES.UTTERANCES_GREETINGS, mode="r") as file_handler:
+            json_data = json.load(file_handler)
+        for entry in json_data["data"]:
+            json_utterances["utterances"].append({key: entry[key] for key in entry})
+        # Create for the intent Help
+        with open(file=FILES.UTTERANCES_HELP, mode="r") as file_handler:
+            json_data = json.load(file_handler)
+        for entry in json_data["data"]:
+            json_utterances["utterances"].append({key: entry[key] for key in entry})
+        # Create for the intent Specify Journey
+        [
+            json_utterances["utterances"].append(value)
+            for value in self.__df_utterances.get_train(
+                total=10,
+                want_origin=True,
+                want_destination=True,
+                want_starting=True,
+                want_ending=True,
+                want_budget=True,
+                must_be_new=True,
+            )
+        ]
+        return json_utterances
+
     def __create_json_patternAnyEntities(self) -> json:
         """Create the patternAnyEntities part of the json.
 
@@ -231,7 +263,7 @@ class Luis_app_handler:
                 {
                     "name": LUIS_APPS.FEATURES[phrase_list]["name"],
                     "mode": True,
-                    "zords": f"{data['list']}",
+                    "words": f"{data['list']}",
                     "activated": True,
                     "enabledForAllModels": False,
                 }
@@ -286,6 +318,7 @@ class Luis_app_handler:
         json_app.update(self.__create_json_patterns())
         json_app.update(self.__create_json_settings())
         self.__json = json_app
+        return self.__json
 
     @property
     def json_app(self) -> json:
@@ -296,8 +329,52 @@ class Luis_app_handler:
         """
         return self.__json
 
+    def save_json(self) -> None:
+        """Save the json."""
+        with open(file=FILES.TRAIN_JSON, mode="w") as file_handler:
+            json.dump(self.json_app, file_handler)
+
+    def get_test_set(
+        self,
+        total: int = 10,
+        want_origin: bool = True,
+        want_destination: bool = True,
+        want_starting: bool = True,
+        want_ending: bool = True,
+        want_budget: bool = True,
+        must_be_new: bool = True,
+    ) -> json:
+        """Provide a json of utterances for batch testing.
+
+        Args:
+            total (int, optional)             : number of utterances wanted. Defaults to 10.
+            want_Origin (bool, optional)      : need data with entity Origin. Defaults to True.
+            want_Destination (bool, optional) : need data with entity Destination. Defaults to True.
+            want_starting (bool, optional)    : need data with entity Starting. Defaults to True.
+            want_ending (bool, optional)      : need data with entity Ending. Defaults to True.
+            want_budget (bool, optional)      : need data with entity Budget. Defaults to True.
+            must_be_new (bool, optional)      : need data not used at this point. Defaults to True.
+
+        Returns:
+            json: json of the utterances
+        """
+
+        return self.__df_utterances.get_test(
+            total=total,
+            want_origin=want_origin,
+            want_destination=want_destination,
+            want_starting=want_starting,
+            want_ending=want_ending,
+            want_budget=want_budget,
+            must_be_new=must_be_new,
+        )
+
 
 # Element for debug
 if __name__ == "__main__":
     lah = Luis_app_handler()
-    print(len(lah))
+    lah.save_json()
+    json_test = lah.get_test_set()
+    with open(file=FILES.TEST_JSON, mode="w") as file_handler:
+        json.dump(json_test, file_handler)
+    print(lah.json_app)

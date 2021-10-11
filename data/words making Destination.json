@@ -1,6 +1,5 @@
 {
     "list" : [
-                "to",
                 "ending at",
                 "end at",
                 "driving to",
@@ -9,6 +8,7 @@
                 "fly to",
                 "arriving at",
                 "arrive at",
-                "going to"
+                "going to",
+                "to"
     ]
 }
