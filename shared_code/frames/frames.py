@@ -213,7 +213,7 @@ class Frames:
             Dict : startPos and endPos for the word with preword.
         """
         startPos = text.find(word)
-        endPos = min(startPos + len(word), len(text) - 1)
+        endPos = min(startPos + len(word), len(text))
         for preword in list_of_prewords:
             preword_position = text[:startPos].rfind(preword)
             if preword_position == -1:

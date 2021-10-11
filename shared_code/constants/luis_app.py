@@ -18,10 +18,13 @@ class LUIS_APPS:  # pylint: disable=C0103
     NAME: Final = "Fly me"
     DESCRIPTION: Final = "LUIS App for Fly me"
 
+    INTENT_SPECIFY_JOURNEY_NAME: Final[str] = "Specify journey name"
+    INTENT_GREETINGS_NAME: Final[str] = "Greetings name"
+    INTENT_HELP_NAME: Final[str] = "Help name"
     INTENTS: Final[Dict[str, str]] = {
-        "Specify journey name": "Specify journey",
-        "Greetings name": "Greetings",
-        "Help name": "Help",
+        INTENT_SPECIFY_JOURNEY_NAME: "Specify journey",
+        INTENT_GREETINGS_NAME: "Greetings",
+        INTENT_HELP_NAME: "Help",
     }
 
     ENTITIES: Final[Dict[str, str]] = {
