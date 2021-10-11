@@ -154,7 +154,7 @@ class Frames:
             "ok for training": len(self.__df_utterances) * [False],
             "ok for test": len(self.__df_utterances) * [False],
             "used for training": len(self.__df_utterances) * [False],
-            "used for test": len(self.__df_utterances) * [False],
+            "used for testing": len(self.__df_utterances) * [False],
             UTTERANCES.ENTITY_FROM_PLACE: len(self.__df_utterances) * [False],
             UTTERANCES.ENTITY_TO_PLACE: len(self.__df_utterances) * [False],
             UTTERANCES.ENTITY_FROM_DATE: len(self.__df_utterances) * [False],
@@ -400,7 +400,7 @@ class Frames:
         """
         mask = self.__df_train_test["ok for test"] != False
         if must_be_new:
-            mask &= self.__df_train_test["used for test"] == False
+            mask &= self.__df_train_test["used for testing"] == False
         if want_origin:
             mask &= self.__df_train_test[UTTERANCES.ENTITY_FROM_PLACE]
         if want_destination:
@@ -422,7 +422,7 @@ class Frames:
         indexes = list(self.__df_utterances.loc[mask].index)
         random.shuffle(indexes)
         samples = random.sample(indexes, min(len(indexes), total))
-        self.__df_train_test.loc[indexes, "used for test"] = True
+        self.__df_train_test.loc[indexes, "used for testing"] = True
         return [self.__create_json_for_utterance(sample) for sample in samples]
 
 
