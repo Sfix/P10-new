@@ -1,0 +1,15 @@
+{
+    "title": "Fly ME!",
+    "creator": {
+                "name" : "Serge Neuman"
+    },
+    "sentences": {
+                    "line_1" : "I am here to help you to define your journey!",
+                    "line_2" : "What I need from you is:",
+                    "line_3" : "1) the city of origin for your trip,",
+                    "line_4" : "2) the city you want to visit,",
+                    "line_5" : "3) the dates for this trip,",
+                    "line_6" : "4) your best budget.",
+                    "line_7" : "Now, it is your turn... I'm listening"
+    }
+}

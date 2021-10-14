@@ -1,22 +1,34 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
+# Updated by Serge Neuman for P10 of OpenClassrooms
 
 from botbuilder.ai.luis import LuisApplication, LuisRecognizer, LuisPredictionOptions
 from botbuilder.core import (
-    Recognizer,
-    RecognizerResult,
-    TurnContext,
-    BotTelemetryClient,
-    NullTelemetryClient,
+                                Recognizer,
+                                RecognizerResult,
+                                TurnContext,
+                                BotTelemetryClient,
+                                NullTelemetryClient,
 )
 
 from config import DefaultConfig
 
 
-class FlightBookingRecognizer(Recognizer):
+class Journey_specifier_recognizer(Recognizer):
+    """Decode the messages from LUIS.
+
+    Args:
+        Recognizer (botbuilder.core.Recognizer): Recognizer
+    """
     def __init__(
         self, configuration: DefaultConfig, telemetry_client: BotTelemetryClient = None
     ):
+        """Init the class.
+
+        Args:
+            configuration (DefaultConfig): [description]
+            telemetry_client (BotTelemetryClient, optional): [description]. Defaults to None.
+        """
         self._recognizer = None
 
         luis_is_configured = (
@@ -42,8 +54,20 @@ class FlightBookingRecognizer(Recognizer):
 
     @property
     def is_configured(self) -> bool:
-        # Returns true if luis is configured in the config.py and initialized.
+        """Test if everything is ok.
+
+        Returns:
+            bool: true if luis is configured in the config.py and initialized.
+        """
         return self._recognizer is not None
 
     async def recognize(self, turn_context: TurnContext) -> RecognizerResult:
+        """Handle the response from user.
+
+        Args:
+            turn_context (TurnContext): [description]
+
+        Returns:
+            RecognizerResult: [description]
+        """
         return await self._recognizer.recognize(turn_context)
