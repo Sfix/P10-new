@@ -10,6 +10,11 @@ This bot demonstrates the following:
 - Handle user interruptions for such things as `Help` or `Cancel`.
 - Prompt for and validate requests for information from the user.
 """
+import os
+import sys
+if os.getcwd() not in sys.path:
+    sys.path.append(os.getcwd())
+
 
 from http import HTTPStatus
 
@@ -71,7 +76,7 @@ BOT = DialogAndWelcomeBot(CONVERSATION_STATE, USER_STATE, DIALOG, TELEMETRY_CLIE
 
 # Listen for incoming requests on /api/messages.
 async def messages(req: Request) -> Response:
-    """Handles the messages received from user.
+    """Handle the messages received from user.
 
     Args:
         req (Request): The message received from the user.

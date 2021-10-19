@@ -22,10 +22,12 @@ class LUIS_APPS:  # pylint: disable=C0103
     INTENT_GREETINGS_NAME: Final[str] = "Greetings name"
     INTENT_HELP_NAME: Final[str] = "Help name"
     INTENTS: Final[Dict[str, str]] = {
-        INTENT_SPECIFY_JOURNEY_NAME: "Specify journey",
+        INTENT_SPECIFY_JOURNEY_NAME: "Specify_journey",
         INTENT_GREETINGS_NAME: "Greetings",
         INTENT_HELP_NAME: "Help",
     }
+    NONE_INTENT = "NoneIntent"
+    THREESHOLD_FOR_VALID_INTENT = 0.5
 
     ENTITIES: Final[Dict[str, str]] = {
         "From place name": UTTERANCES.ENTITY_FROM_PLACE,
