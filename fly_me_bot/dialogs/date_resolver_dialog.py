@@ -34,7 +34,7 @@ class DateResolverDialog(CancelAndHelpDialog):
         date_time_prompt.telemetry_client = telemetry_client
 
         waterfall_dialog = WaterfallDialog(
-            WaterfallDialog.__name__ + "2", [self.initial_step, self.final_step]
+            WaterfallDialog.__name__ + "2", [self.initial_step, self.starting_date_step, self.return_date_step, self.final_step]
         )
         waterfall_dialog.telemetry_client = telemetry_client
 
@@ -73,6 +73,23 @@ class DateResolverDialog(CancelAndHelpDialog):
             )
 
         return await step_context.next(DateTimeResolution(timex=timex))
+
+    async def starting_date_step(
+                                    self,
+                                    step_context: WaterfallStepContext
+    ) -> DialogTurnResult:
+        """Handle the starting date."""
+        serge = "serge"
+        return await step_context.next(None)
+
+    async def return_date_step(
+                                    self,
+                                    step_context: WaterfallStepContext
+    ) -> DialogTurnResult:
+        """Handle the return date."""
+        serge = "serge"
+        return await step_context.next(None)
+
 
     async def final_step(self, step_context: WaterfallStepContext):
         """Cleanup - set final return value and end dialog."""

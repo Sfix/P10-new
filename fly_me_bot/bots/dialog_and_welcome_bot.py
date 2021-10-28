@@ -55,6 +55,7 @@ class DialogAndWelcomeBot(DialogBot):
         """Create an adaptive card."""
         relative_path = os.path.abspath(os.path.dirname(__file__))
         path = os.path.join(relative_path, "resources/welcomeCard.json")
+# ! Serge - Charger les données.
         with open(path) as card_file:
             card = json.load(card_file)
 

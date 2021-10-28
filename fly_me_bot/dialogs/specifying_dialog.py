@@ -8,7 +8,11 @@ from botbuilder.dialogs import WaterfallDialog, WaterfallStepContext, DialogTurn
 from botbuilder.dialogs.prompts import ConfirmPrompt, TextPrompt, PromptOptions
 from botbuilder.core import MessageFactory, BotTelemetryClient, NullTelemetryClient
 from .cancel_and_help_dialog import CancelAndHelpDialog
-from .date_resolver_dialog import DateResolverDialog
+# from .date_resolver_dialog import DateResolverDialog
+from journey_specifier_recognizer import Journey_specifier_recognizer
+
+
+from helpers.luis_helper import LuisHelper
 
 
 class Specifying_dialog(CancelAndHelpDialog):
@@ -17,7 +21,7 @@ class Specifying_dialog(CancelAndHelpDialog):
     def __init__(
         self,
         dialog_id: str = None,
-        telemetry_client: BotTelemetryClient = NullTelemetryClient(),
+        telemetry_client: BotTelemetryClient = NullTelemetryClient()
     ):
         """Init the class.
 
@@ -31,6 +35,7 @@ class Specifying_dialog(CancelAndHelpDialog):
         self.telemetry_client = telemetry_client
         text_prompt = TextPrompt(TextPrompt.__name__)
         text_prompt.telemetry_client = telemetry_client
+        self._luis_recognizer = None
 
         waterfall_dialog = WaterfallDialog(
             WaterfallDialog.__name__,
@@ -47,10 +52,10 @@ class Specifying_dialog(CancelAndHelpDialog):
 
         self.add_dialog(text_prompt)
         # self.add_dialog(ConfirmPrompt(ConfirmPrompt.__name__))
-        self.add_dialog(
-            DateResolverDialog(DateResolverDialog.__name__, self.telemetry_client)
-        )
-        self.add_dialog(waterfall_dialog)
+        # self.add_dialog(
+        #     DateResolverDialog(DateResolverDialog.__name__, self.telemetry_client)
+        # )
+        # self.add_dialog(waterfall_dialog)
 
         self.initial_dialog_id = WaterfallDialog.__name__
 
@@ -67,12 +72,18 @@ class Specifying_dialog(CancelAndHelpDialog):
                     prompt=MessageFactory.text("To what city would you like to travel?")
                 ),
             )  # pylint: disable=line-too-long,bad-continuation
+# TODO : Serge Ajouter le renseignement du reste
 
         return await step_context.next(journey_details.destination)
 
     async def origin_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         """Prompt for origin city."""
         journey_details = step_context.options
+
+        # Ask Luis what it thinks about it.
+        intent, luis_result = await LuisHelper.execute_luis_query(
+            self._luis_recognizer, step_context.context
+        )
 
         # Capture the response to the previous step's prompt
         journey_details.destination = step_context.result
@@ -99,9 +110,7 @@ class Specifying_dialog(CancelAndHelpDialog):
         if not journey_details.travel_date or self.is_ambiguous(
             journey_details.travel_date
         ):
-            return await step_context.begin_dialog(
-                DateResolverDialog.__name__, journey_details.travel_date
-            )  # pylint: disable=line-too-long
+            return await step_context.reprompt_dialog()
 
         return await step_context.next(journey_details.travel_date)
 

@@ -20,6 +20,7 @@ class DefaultConfig:
 
     logger.info("Class DefaultConfig")
 
+    SERVICE_URL = os.getenv("ServiceURL", "")
     PORT = 3978
     APP_ID = os.getenv("MicrosoftAppId", "")
     APP_PASSWORD = os.getenv("MicrosoftAppPassword", "")

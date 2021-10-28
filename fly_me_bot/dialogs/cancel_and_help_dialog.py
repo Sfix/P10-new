@@ -40,15 +40,15 @@ class CancelAndHelpDialog(ComponentDialog):
         return await super(CancelAndHelpDialog, self).on_continue_dialog(inner_dc)
 
     async def interrupt(self, inner_dc: DialogContext) -> DialogTurnResult:
-        """Detect interruptions."""
+        """Detect obvious interruptions before wasting a request on LUIS."""
         if inner_dc.context.activity.type == ActivityTypes.message:
             text = inner_dc.context.activity.text.lower()
 
-            if text in ("help", "?"):
+            if text in ("help", "?", "sos"):
                 await inner_dc.context.send_activity("Show Help...")
                 return DialogTurnResult(DialogTurnStatus.Waiting)
 
-            if text in ("cancel", "quit"):
+            if text in ("cancel", "quit", "bye"):
                 await inner_dc.context.send_activity("Cancelling")
                 return await inner_dc.cancel_all_dialogs()
 

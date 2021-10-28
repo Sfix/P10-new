@@ -213,18 +213,28 @@ class Luis_app_handler:
             json_data = json.load(file_handler)
         for entry in json_data["data"]:
             json_utterances["utterances"].append({key: entry[key] for key in entry})
-        # Create for the intent Specify Journey
-        [
-            json_utterances["utterances"].append(value)
-            for value in self.__df_utterances.get_train(
-                total=10,
-                want_origin=True,
-                want_destination=True,
-                want_starting=True,
-                want_ending=True,
-                want_budget=True,
+        # Create for the intent Specify Journey. For a strong Luis
+        # we need utterances with missing parts
+        list_utterances = [
+            self.__df_utterances.get_train(
+                total=5,
+                want_origin=want_origin,
+                want_destination=want_destination,
+                want_starting=want_starting,
+                want_ending=want_ending,
+                want_budget=want_budget,
                 must_be_new=True,
             )
+            for want_origin in [True, False]
+            for want_destination in [True, False]
+            for want_starting in [True, False]
+            for want_ending in [True, False]
+            for want_budget in [True, False]
+        ]
+        [
+            json_utterances["utterances"].append(value)
+            for list_values in list_utterances
+            for value in list_values
         ]
         return json_utterances
 
@@ -336,38 +346,68 @@ class Luis_app_handler:
 
     def get_test_set(
         self,
-        total: int = 10,
-        want_origin: bool = True,
-        want_destination: bool = True,
-        want_starting: bool = True,
-        want_ending: bool = True,
-        want_budget: bool = True,
+        total: int = 2,
+        want_origin: bool = [True, False],
+        want_destination: bool = [True, False],
+        want_starting: bool = [True, False],
+        want_ending: bool = [True, False],
+        want_budget: bool = [True, False],
         must_be_new: bool = True,
     ) -> json:
         """Provide a json of utterances for batch testing.
 
         Args:
             total (int, optional)             : number of utterances wanted. Defaults to 10.
-            want_Origin (bool, optional)      : need data with entity Origin. Defaults to True.
-            want_Destination (bool, optional) : need data with entity Destination. Defaults to True.
-            want_starting (bool, optional)    : need data with entity Starting. Defaults to True.
-            want_ending (bool, optional)      : need data with entity Ending. Defaults to True.
-            want_budget (bool, optional)      : need data with entity Budget. Defaults to True.
+            want_Origin (list[bool], optional)      : need data with entity Origin. Defaults to True.
+            want_Destination (list[bool], optional) : need data with entity Destination. Defaults to True.
+            want_starting (list[bool], optional)    : need data with entity Starting. Defaults to True.
+            want_ending (list[bool], optional)      : need data with entity Ending. Defaults to True.
+            want_budget (list[bool], optional)      : need data with entity Budget. Defaults to True.
             must_be_new (bool, optional)      : need data not used at this point. Defaults to True.
 
         Returns:
             json: json of the utterances
         """
 
-        return self.__df_utterances.get_test(
-            total=total,
-            want_origin=want_origin,
-            want_destination=want_destination,
-            want_starting=want_starting,
-            want_ending=want_ending,
-            want_budget=want_budget,
-            must_be_new=must_be_new,
-        )
+        def value(
+            total,
+            want_origin,
+            want_destination,
+            want_starting,
+            want_ending,
+            want_budget,
+            must_be_new,
+        ):
+            try:
+                return self.__df_utterances.get_test(
+                    total=total,
+                    want_origin=want_origin,
+                    want_destination=want_destination,
+                    want_starting=want_starting,
+                    want_ending=want_ending,
+                    want_budget=want_budget,
+                    must_be_new=must_be_new,
+                )
+            except:
+                return {}
+
+        data = [
+            value(
+                total=total,
+                want_origin=want_origin_value,
+                want_destination=want_destination_value,
+                want_starting=want_starting_value,
+                want_ending=want_ending_value,
+                want_budget=want_budget_value,
+                must_be_new=must_be_new,
+            )
+            for want_origin_value in want_origin
+            for want_destination_value in want_destination
+            for want_starting_value in want_starting
+            for want_ending_value in want_ending
+            for want_budget_value in want_budget
+        ]
+        return [value for list_value in data for value in list_value]
 
 
 # Element for debug

@@ -53,69 +53,91 @@ class LuisHelper:
         try:
             recognizer_result = await luis_recognizer.recognize(turn_context)
 
-            intent = (
-                sorted(
-                    recognizer_result.intents,
-                    key=recognizer_result.intents.get,
-                    reverse=True,
-                )[:1][0]
-                if recognizer_result.intents
-                else None
-            )
-
-            # Check that Luis has found something with enough confidence.
-            if recognizer_result.intents[intent].score < LUIS_APPS.THREESHOLD_FOR_VALID_INTENT:
-                intent = None
-
-
-            if intent == LUIS_APPS.INTENTS[LUIS_APPS.INTENT_SPECIFY_JOURNEY_NAME]:
-                logger.info("Need to decode the intent.")
-                result = Journey_details()
-
-                # We need to get the result from the LUIS JSON which at every level returns an array.
-                to_entities = recognizer_result.entities.get("$instance", {}).get(
-                    LUIS_APPS.ENTITIES["To place name"], []
-                )
-                if len(to_entities) > 0:
-                    if recognizer_result.entities.get(LUIS_APPS.ENTITIES["To place name"], [{"$instance": {}}])[0][
-                        "$instance"
-                    ]:
-                        result.destination = to_entities[0]["text"].capitalize()
-                    else:
-                        result.unsupported_airports.append(
-                            to_entities[0]["text"].capitalize()
-                        )
-
-                from_entities = recognizer_result.entities.get("$instance", {}).get(
-                    LUIS_APPS.ENTITIES["From place name"], []
-                )
-                if len(from_entities) > 0:
-                    if recognizer_result.entities.get(LUIS_APPS.ENTITIES["From place name"], [{"$instance": {}}])[0][
-                        "$instance"
-                    ]:
-                        result.origin = from_entities[0]["text"].capitalize()
-                    else:
-                        result.unsupported_airports.append(
-                            from_entities[0]["text"].capitalize()
-                        )
-
-                # This value will be a TIMEX. And we are only interested in a Date so grab the first result and drop
-                # the Time part. TIMEX is a format that represents DateTime expressions that include some ambiguity.
-                # e.g. missing a Year.
-                date_entities = recognizer_result.entities.get("datetime", [])
-                if date_entities:
-                    timex = date_entities[0]["timex"]
-
-                    if timex:
-                        datetime = timex[0].split("T")[0]
-
-                        result.travel_date = datetime
-
-                else:
-                    result.travel_date = None
-
         except Exception as exception:
             logger.info(f"Pb: {exception}")
             print(exception)
+
+
+        intent = (
+                    sorted(
+                            recognizer_result.intents,
+                            key=recognizer_result.intents.get,
+                            reverse=True,
+                    )[:1][0]
+                    if recognizer_result.intents
+                    else None
+        )
+
+        # Check that Luis has found something with enough confidence.
+        if recognizer_result.intents[intent].score < LUIS_APPS.THREESHOLD_FOR_VALID_INTENT:
+            return None, None
+
+        if intent is None:
+            return None, None
+
+        # Check if we have a greeting and if yes, which one
+        if intent == LUIS_APPS.INTENTS[LUIS_APPS.INTENT_GREETINGS_NAME]:
+            result = "Hey"
+            return intent, result
+
+        # Check if we have a request for Help
+        if intent == LUIS_APPS.INTENTS[LUIS_APPS.INTENT_HELP_NAME]:
+            return intent, None
+
+        # We have to decode the journey now
+        if intent != LUIS_APPS.INTENTS[LUIS_APPS.INTENT_SPECIFY_JOURNEY_NAME]:
+            return None, None
+        logger.info("Need to decode the intent.")
+# TODO SERGE : Retrouver les donnees deja trouvees
+        result = Journey_details()
+
+        found_cities = recognizer_result.entities.get(
+                                                        'geographyV2_city',
+                                                        None
+        )
+        to_place = recognizer_result.entities.get(
+                        LUIS_APPS.ENTITIES["To place name"].replace(' ', '_'),
+                        None
+        )
+        if to_place is not None:
+            for city in found_cities:
+                if city in to_place[0]:
+                    result.destination = city
+                    break
+
+        from_place = recognizer_result.entities.get(
+                    LUIS_APPS.ENTITIES["From place name"].replace(' ', '_'),
+                    None
+        )
+        if from_place is not None:
+            for city in found_cities:
+                if city in from_place[0]:
+                    result.origin = city
+                    break
+
+
+        # This value will be a TIMEX. And we are only interested in a Date
+        #  so grab the first result and drop the Time part. TIMEX is a
+        # format that represents DateTime expressions that include some ambiguity.
+        # e.g. missing a Year.
+        date_entities = recognizer_result.entities.get("datetime", [])
+        if date_entities:
+            timex = date_entities[0]["timex"]
+
+            if timex:
+                datetime = timex[0].split("T")[0]
+
+                result.travel_date = datetime
+
+        else:
+            result.travel_date = None
+
+
+        budget_entity = recognizer_result.entities.get(
+                                                        "money",
+                                                        None
+        )
+        if budget_entity is not None:
+            result.max_budget = budget_entity[0]['number']
 
         return intent, result

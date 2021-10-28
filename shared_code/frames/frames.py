@@ -221,7 +221,7 @@ class Frames:
             if text[preword_position + len(preword) : startPos].isspace():
                 startPos = preword_position
                 break
-        return {"startPos": startPos, "endPos": endPos}
+        return {"startPos": startPos, "endPos": endPos - 1}
 
     def __create_json_for_utterance(self, sample: int) -> json:
         """Create the json that defines an utterance.
@@ -412,13 +412,13 @@ class Frames:
         if want_budget:
             mask &= self.__df_train_test[UTTERANCES.ENTITY_MAX_BUDGET]
         # Take the best ratings
+        if sum(mask) == 0:
+            raise ("Pb. pas assez de données")
         for n in range(5, -6, -1):
             tmp_mask = mask & (self.__df_utterances["rating"] >= n)
             if sum(tmp_mask) >= total:
                 mask = tmp_mask
                 break
-        if sum(mask) == 0:
-            raise ("Pb. pas assez de données")
         indexes = list(self.__df_utterances.loc[mask].index)
         random.shuffle(indexes)
         samples = random.sample(indexes, min(len(indexes), total))

@@ -27,7 +27,7 @@ class LUIS_APPS:  # pylint: disable=C0103
         INTENT_HELP_NAME: "Help",
     }
     NONE_INTENT = "NoneIntent"
-    THREESHOLD_FOR_VALID_INTENT = 0.5
+    THREESHOLD_FOR_VALID_INTENT = 0.20
 
     ENTITIES: Final[Dict[str, str]] = {
         "From place name": UTTERANCES.ENTITY_FROM_PLACE,
