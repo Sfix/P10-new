@@ -70,7 +70,7 @@ class LuisHelper:
 
         # Check that Luis has found something with enough confidence.
         if recognizer_result.intents[intent].score < LUIS_APPS.THREESHOLD_FOR_VALID_INTENT:
-            return None, None
+            return None, recognizer_result.entities
 
         if intent is None:
             return None, None
