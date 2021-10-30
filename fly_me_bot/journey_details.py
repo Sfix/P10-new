@@ -25,3 +25,16 @@ class Journey_details:
         self.departure_date = departure_date
         self.return_date = return_date
         self.max_budget = max_budget
+
+    def merge(self, value: object, replace_when_exist: bool = False) -> None:
+        """Merge current value with another."""
+        if (self.destination is None) or (replace_when_exist and value.destination is not None):
+            self.destination = value.destination
+        if (self.origin is None) or (replace_when_exist and value.origin is not None):
+            self.origin = value.origin
+        if (self.departure_date is None) or (replace_when_exist and value.departure_date is not None):
+            self.departure_date = value.departure_date
+        if (self.return_date is None) or (replace_when_exist and value.return_date is not None):
+            self.return_date = value.return_date
+        if (self.max_budget is None) or (replace_when_exist and value.max_budget is not None):
+            self.max_budget = value.max_budget

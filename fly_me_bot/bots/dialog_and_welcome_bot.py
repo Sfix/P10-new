@@ -2,6 +2,7 @@
 # Licensed under the MIT License.
 """Main dialog to welcome users."""
 import json
+from os import replace
 import os.path
 
 from typing import List
@@ -11,6 +12,7 @@ from botbuilder.core import (
     ConversationState,
     UserState,
     BotTelemetryClient,
+    CardFactory
 )
 from botbuilder.schema import Activity, Attachment, ChannelAccount
 from helpers.activity_helper import create_activity_reply
@@ -55,10 +57,27 @@ class DialogAndWelcomeBot(DialogBot):
         """Create an adaptive card."""
         relative_path = os.path.abspath(os.path.dirname(__file__))
         path = os.path.join(relative_path, "resources/welcomeCard.json")
-# ! Serge - Charger les données.
         with open(path) as card_file:
-            card = json.load(card_file)
+            card_template = json.load(card_file)
+        path = os.path.join(relative_path, "resources/welcomeCard.data.json")
+        with open(path) as card_file:
+            card_data = json.load(card_file)
 
+        def replace(template: dict, data:dict):
+            import re
+            str_temp = json.dumps(template)
+            for key in data:
+                if type(data[key]) == dict:
+                    for sub_key in data[key]:
+                        pattern = "\${"+key+"."+sub_key+"}"
+                        str_temp = re.sub(pattern, data[key][sub_key], str_temp)
+                else:
+                    pattern = "\${"+key+"}"
+                    str_temp = re.sub(pattern, str(data[key]), str_temp)
+            return json.loads(str_temp)
+
+        card = replace(template= card_template, data= card_data)
         return Attachment(
-            content_type="application/vnd.microsoft.card.adaptive", content=card
+            content_type="application/vnd.microsoft.card.adaptive",
+            content= card
         )

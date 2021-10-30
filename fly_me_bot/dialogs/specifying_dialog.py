@@ -54,6 +54,7 @@ class Specifying_dialog(CancelAndHelpDialog):
         waterfall_dialog = WaterfallDialog(
             WaterfallDialog.__name__,
             [
+                self.init_step,
                 self.destination_step,
                 self.origin_step,
                 self.departure_date_step,
@@ -75,41 +76,66 @@ class Specifying_dialog(CancelAndHelpDialog):
 
         self.initial_dialog_id = WaterfallDialog.__name__
 
-    async def destination_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
-        """Prompt for destination."""
-        journey_details = step_context.options
 
-        if journey_details.destination is None:
+    async def init_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
+        """Handle the entry to the dialog."""
+        Journey_details = step_context.options
+
+        # Test if we enter from reload
+        if step_context.options.destination is None:
             return await step_context.prompt(
                                                 TextPrompt.__name__,
                                                 PromptOptions(
                     prompt=MessageFactory.text(
                             "To which city would you like to travel?"
-                            )
-                                                ),
-            )  # pylint: disable=line-too-long,bad-continuation
+                            ),
+                    retry_prompt= MessageFactory.text(
+                            "I do need to know where you want to go."
+                    )
+
+                                                )
+            )
+
+        return await step_context.next(step_context.options.destination)
+
+
+    async def destination_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
+        """Prompt for destination."""
+        journey_details = step_context.options
+
+        if journey_details.destination is None:
+            # Ask Luis what it thinks about it.
+            intent, luis_result = await LuisHelper.execute_luis_query(
+                self.luis_recognizer, step_context.context
+            )
+            journey_details.merge(luis_result, replace_when_exist= False)
+            if luis_result.destination is None:
+                return await step_context.replace_dialog(
+                                        dialog_id= Specifying_dialog.__name__,
+                                        options= journey_details
+                )
+            # define intent and luis_result without luis
+#            journey_details.destination = luis_result.destination
+
         return await step_context.next(journey_details.destination)
 
     async def origin_step(self, step_context: WaterfallStepContext) -> DialogTurnResult:
         """Prompt for origin city."""
         journey_details = step_context.options
 
-        # Check the number of words to guess if it worth asking LUIS
+        # Check the number of words to guess if it worth asking
         # to decode the answer.
         if len(step_context.result.split(" ")) > 1:
         # Ask Luis what it thinks about it.
             intent, luis_result = await LuisHelper.execute_luis_query(
                 self.luis_recognizer, step_context.context
             )
+            journey_details.merge(luis_result, replace_when_exist= False)
             result = luis_result.destination
             if result is None:
-                return await step_context.prompt(
-                            TextPrompt.__name__,
-                            PromptOptions(
-                                            retry_prompt= MessageFactory.text(
-                                                "I do need your destination..."
-                                            )
-                            )
+                return await step_context.replace_dialog(
+                                        dialog_id= Specifying_dialog.__name__,
+                                        options= journey_details
                 )
         else:
             # define intent and luis_result without luis
@@ -141,18 +167,12 @@ class Specifying_dialog(CancelAndHelpDialog):
             intent, luis_result = await LuisHelper.execute_luis_query(
                 self.luis_recognizer, step_context.context
             )
+            journey_details.merge(luis_result, replace_when_exist= False)
             result = luis_result.origin
             if result is None:
-                return await step_context.prompt(
-                            TextPrompt.__name__,
-                            PromptOptions(
-                                            prompt= MessageFactory.text(
-                                                "Disclose your departure point."
-                                            ),
-                                            retry_prompt= MessageFactory.text(
-                                                "I do need to know your departure point !"
-                                            )
-                            )
+                return await step_context.replace_dialog(
+                                        dialog_id= Specifying_dialog.__name__,
+                                        options= journey_details
                 )
         else:
             # define intent and luis_result without luis
@@ -171,7 +191,8 @@ class Specifying_dialog(CancelAndHelpDialog):
             return await step_context.prompt(
                 DateTimePrompt.__name__,
                 PromptOptions(
-                    prompt=MessageFactory.text("When do you want to leave?")
+                    prompt=MessageFactory.text("When do you want to leave?"),
+                    retry_prompt= MessageFactory.text("Please be more precise.")
                 ),
             )  # pylint: disable=line-too-long,bad-continuation
         return await step_context.next(journey_details.departure_date)
@@ -183,35 +204,35 @@ class Specifying_dialog(CancelAndHelpDialog):
 
         # Check the number of words to guess if it worth asking LUIS to decode
         # the answer.
-        if "definite" not in Timex(step_context.result).types:
-        # Ask Luis what it thinks about it.
-            intent, luis_result = await LuisHelper.execute_luis_query(
-                self.luis_recognizer, step_context.context
-            )
-            result = luis_result.departure_date
-            if result is None or self.is_ambiguous(result):
-                return await step_context.prompt(
-                            DateTimePrompt.__name__,
-                            PromptOptions(
-                                retry_prompt= MessageFactory.text(
-                                    "I do need to know when is your departure!"
-                                )
-                            )
-                )
-        else:
-            # define intent and luis_result without luis
-            intent = LUIS_APPS.INTENTS[LUIS_APPS.INTENT_SPECIFY_JOURNEY_NAME]
-            result = Timex(step_context.result)
-        # If we are here, we consider that the origin point is legit
-        journey_details.departure_date = result
+        # if "definite" not in Timex(step_context.result[0].timex.split("T")[0]).types:
+        # # Ask Luis what it thinks about it.
+        #     intent, luis_result = await LuisHelper.execute_luis_query(
+        #         self.luis_recognizer, step_context.context
+        #     )
+        #     result = luis_result.departure_date
+        #     if result is None or self.is_ambiguous(result):
+        #         return await step_context.replace_dialog(
+        #                                 dialog_id= Specifying_dialog.__name__,
+        #                                 options= journey_details
+        #         )
+        # else:
+        #     # define intent and luis_result without luis
+        #     intent = LUIS_APPS.INTENTS[LUIS_APPS.INTENT_SPECIFY_JOURNEY_NAME]
+        #     result = Timex(step_context.result)
+        # # If we are here, we consider that the origin point is legit
+        # journey_details.departure_date = result
+        # Due to the validation we have a date
+        if journey_details.departure_date is None:
+            journey_details.departure_date = step_context.result[0].timex
 
         # Check if we need to display the request for the budget before going
         # down to the next step of the waterfall
-        if journey_details.max_budget is None:
+        if journey_details.return_date is None:
             return await step_context.prompt(
-                TextPrompt.__name__,
+                DateTimePrompt.__name__,
                 PromptOptions(
-                    prompt=MessageFactory.text("What is your best budget?")
+                    prompt=MessageFactory.text("When do you want to come back?"),
+                    retry_prompt= MessageFactory.text("I need you to be more precise.")
                 ),
             )  # pylint: disable=line-too-long,bad-continuation
         return await step_context.next(journey_details.return_date)
@@ -222,29 +243,28 @@ class Specifying_dialog(CancelAndHelpDialog):
         """Prompt for the max budget."""
         journey_details = step_context.options
 
-        # Check the number of words to guess if it worth asking LUIS to decode
-        # the answer.
-        if "definite" not in Timex(step_context.result).types:
-        # Ask Luis what it thinks about it.
-            intent, luis_result = await LuisHelper.execute_luis_query(
-                self.luis_recognizer, step_context.context
-            )
-            result = luis_result.return_date
-            if result is None or self.is_ambiguous(result):
-                return await step_context.prompt(
-                            DateTimePrompt.__name__,
-                            PromptOptions(
-                                retry_prompt= MessageFactory.text(
-                                    "Do you know when you want to be back!"
-                                )
-                            )
-                )
-        else:
-            # define intent and luis_result without luis
-            intent = LUIS_APPS.INTENTS[LUIS_APPS.INTENT_SPECIFY_JOURNEY_NAME]
-            result = Timex(step_context.result)
-        # Capture the value.
-        journey_details.departure_date = result
+        # # Check the number of words to guess if it worth asking LUIS to decode
+        # # the answer.
+        # if "definite" not in Timex(step_context.result).types:
+        # # Ask Luis what it thinks about it.
+        #     intent, luis_result = await LuisHelper.execute_luis_query(
+        #         self.luis_recognizer, step_context.context
+        #     )
+        #     result = luis_result.return_date
+        #     if result is None or self.is_ambiguous(result):
+        #         return await step_context.replace_dialog(
+        #                                 dialog_id= Specifying_dialog.__name__,
+        #                                 options= journey_details
+        #         )
+        # else:
+        #     # define intent and luis_result without luis
+        #     intent = LUIS_APPS.INTENTS[LUIS_APPS.INTENT_SPECIFY_JOURNEY_NAME]
+        #     result = Timex(step_context.result)
+        # # Capture the value.
+        # journey_details.departure_date = result
+        # Thanks to the validation we have a right format
+        if journey_details.return_date is None:
+            journey_details.return_date = step_context.result[0].timex
 
         if journey_details.max_budget is None:
             return await step_context.prompt(
@@ -264,20 +284,16 @@ class Specifying_dialog(CancelAndHelpDialog):
 
         # Check the number of words to guess if it worth asking LUIS
         # to decode the answer.
-        if len(step_context.result.split(" ")) > 1:
-        # Ask Luis what it thinks about it.
+        if not step_context.result.replace('.', '').isdigit():
+            # Ask Luis what it thinks about it.
             intent, luis_result = await LuisHelper.execute_luis_query(
                 self.luis_recognizer, step_context.context
             )
             result = luis_result.max_budget
             if result is None:
-                return await step_context.prompt(
-                            TextPrompt.__name__,
-                            PromptOptions(
-                                            retry_prompt= MessageFactory.text(
-                                                "Please, give me your top budget!"
-                                            )
-                            )
+                return await step_context.replace_dialog(
+                                        dialog_id= Specifying_dialog.__name__,
+                                        options= journey_details
                 )
         else:
             # define intent and luis_result without luis
@@ -286,13 +302,20 @@ class Specifying_dialog(CancelAndHelpDialog):
         # If we are here, we consider that the origin point is legit
         journey_details.max_budget = result
 
-        msg = (
-            f"Please confirm, I have you traveling to { journey_details.destination }"
-            + f" from { journey_details.origin }.\n"
-            + f"The departure is on: { journey_details.departure_date} and you return"
-            + f" the { journey_details.return_date}.\n"
-            + f"Your budget is { journey_details.max_budget} top.\n"
+        await step_context.context.send_activity(activity_or_text= "Please confirm the following:")
+        await step_context.context.send_activity(
+                                activity_or_text= f"You want to travel "
+                                        + f"to {journey_details.destination} "
+                                        + f"from {journey_details.origin}"
         )
+        await step_context.context.send_activity(
+                                activity_or_text= f"You would leave on "
+                                        + f"{journey_details.departure_date}"
+                                        + f" and be back "
+                                        + f"for {journey_details.return_date}."
+        )
+        msg = f"Your budget is {journey_details.max_budget['number']} "       \
+                            + f"{journey_details.max_budget['units']} top."
 
         # Offer a YES/NO prompt.
         return await step_context.prompt(
@@ -315,9 +338,23 @@ class Specifying_dialog(CancelAndHelpDialog):
     async def datetime_prompt_validator(prompt_context: PromptValidatorContext) -> bool:
         """Validate the date provided is in proper form."""
         if prompt_context.recognized.succeeded:
-            timex = prompt_context.recognized.value[0].timex.split("T")[0]
-            return "definite" in Timex(timex).types
-
+            timex = Timex(prompt_context.recognized.value[0].timex.split("T")[0])
+            if "definite" in timex.types:
+                return True
+            msg = "Please be more precise. I miss "
+            if timex.day_of_month is None:
+                msg += "the day, "
+            if timex.month is None:
+                msg += "the month, "
+            if timex.year is None:
+                msg += "the year, "
+            split_msg = msg.split(',')
+            if len(split_msg) == 2:
+                msg = split_msg[0] + "."
+            else:
+                msg = ', '.join(split_msg[:-2]) + " and" + split_msg[-2] + "."
+            await prompt_context.context.send_activity(msg)
+        await prompt_context.context.send_activity('You can use the format YYYY-MM-DD')
         return False
 
 

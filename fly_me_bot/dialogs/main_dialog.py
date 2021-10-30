@@ -203,7 +203,8 @@ class MainDialog(ComponentDialog):
             msg_txt  = f"I have understood you want to "
             msg_txt += f"go to {result.destination} from {result.origin}"
             msg_txt += f" on {result.travel_date}"
-            msg_txt += f" and your best budget is {result.max_budget}."
+            msg_txt += f" and your best budget is {result.max_budget['number']}"
+            msg_txt += f" {result.max_budget['units']}."
             message = MessageFactory.text(msg_txt, msg_txt, InputHints.ignoring_input)
             await step_context.context.send_activity(message)
 

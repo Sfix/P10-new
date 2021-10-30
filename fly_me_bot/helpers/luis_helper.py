@@ -138,6 +138,6 @@ class LuisHelper:
                                                         None
         )
         if budget_entity is not None:
-            result.max_budget = budget_entity[0]['number']
+            result.max_budget = budget_entity[0]
 
         return intent, result

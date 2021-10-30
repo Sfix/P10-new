@@ -25,27 +25,32 @@
         },
         {
             "type": "TextBlock",
-            "text": "${sentences.line_3}",
+            "text": "   ${sentences.line_3}",
             "wrap":true
         },
         {
             "type": "TextBlock",
-            "text": "${sentences.line_4}",
+            "text": "   ${sentences.line_4}",
             "wrap":true
         },
         {
             "type": "TextBlock",
-            "text": "${sentences.line_5}",
+            "text": "   ${sentences.line_5}",
             "wrap":true
         },
         {
             "type": "TextBlock",
-            "text": "${sentences.line_6}",
+            "text": "   ${sentences.line_6}",
             "wrap":true
         },
         {
             "type": "TextBlock",
-            "text": "${sentences.line_7}",
+            "text": "   ${sentences.line_7}",
+            "wrap":true
+        },
+        {
+            "type": "TextBlock",
+            "text": "${sentences.line_8}",
             "wrap":true
         }
     ],
