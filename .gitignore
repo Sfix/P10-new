@@ -7,3 +7,5 @@
 .env
 sample_21
 **/__pycache__
+**/*.pyc
+.gitignore
