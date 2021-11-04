@@ -98,8 +98,14 @@ async def messages(req: Request) -> Response:
     return Response(status=HTTPStatus.OK)
 
 
+def alive(req: Request) -> Response:
+    return Response(status= HTTPStatus.OK)
+
+
 APP = web.Application(middlewares=[bot_telemetry_middleware, aiohttp_error_middleware])
 APP.router.add_post("/api/messages", messages)
+APP.router.add_post("/api/alive", alive)
+
 
 if __name__ == "__main__":
     try:
