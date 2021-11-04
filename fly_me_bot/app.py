@@ -15,7 +15,6 @@ import sys
 if os.getcwd() not in sys.path:
     sys.path.append(os.getcwd())
 
-
 from http import HTTPStatus
 
 from aiohttp import web
@@ -104,6 +103,6 @@ APP.router.add_post("/api/messages", messages)
 
 if __name__ == "__main__":
     try:
-        web.run_app(APP, host="localhost", port=CONFIG.PORT)
+        web.run_app(APP, host=f"{os.environ['ServiceURL']}", port=CONFIG.PORT)
     except Exception as error:
         raise error
