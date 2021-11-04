@@ -284,23 +284,24 @@ class Specifying_dialog(CancelAndHelpDialog):
 
         # Check the number of words to guess if it worth asking LUIS
         # to decode the answer.
-        if not step_context.result.replace('.', '').isdigit():
-            # Ask Luis what it thinks about it.
-            intent, luis_result = await LuisHelper.execute_luis_query(
-                self.luis_recognizer, step_context.context
-            )
-            result = luis_result.max_budget
-            if result is None:
-                return await step_context.replace_dialog(
-                                        dialog_id= Specifying_dialog.__name__,
-                                        options= journey_details
+        if journey_details.max_budget is None:
+            if not step_context.result.replace('.', '').isdigit():
+                # Ask Luis what it thinks about it.
+                intent, luis_result = await LuisHelper.execute_luis_query(
+                    self.luis_recognizer, step_context.context
                 )
-        else:
-            # define intent and luis_result without luis
-            intent = LUIS_APPS.INTENTS[LUIS_APPS.INTENT_SPECIFY_JOURNEY_NAME]
-            result = step_context.result
-        # If we are here, we consider that the origin point is legit
-        journey_details.max_budget = result
+                result = luis_result.max_budget
+                if result is None:
+                    return await step_context.replace_dialog(
+                                            dialog_id= Specifying_dialog.__name__,
+                                            options= journey_details
+                    )
+            else:
+                # define intent and luis_result without luis
+                intent = LUIS_APPS.INTENTS[LUIS_APPS.INTENT_SPECIFY_JOURNEY_NAME]
+                result = step_context.result
+            # If we are here, we consider that the origin point is legit
+            journey_details.max_budget = result
 
         await step_context.context.send_activity(activity_or_text= "Please confirm the following:")
         await step_context.context.send_activity(

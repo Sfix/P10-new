@@ -9,3 +9,7 @@ import sys
 path_libraries = os.path.join(os.getcwd(), "shared_code")
 if path_libraries not in sys.path:
     sys.path.append(path_libraries)
+
+path_libraries = os.path.join(os.getcwd(), "fly_me_bot")
+if path_libraries not in sys.path:
+    sys.path.append(path_libraries)

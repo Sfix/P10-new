@@ -99,7 +99,7 @@ class MainDialog(ComponentDialog):
             )
 
         if intent == LUIS_APPS.INTENTS[LUIS_APPS.INTENT_GREETINGS_NAME]:
-            greeting_text = f"{luis_result}! Let's specify your journey :) \U0001F60E"
+            greeting_text = f"{luis_result}! Let's specify your journey \U0001F60E"
             greeting_message = MessageFactory.text(
                                                     greeting_text,
                                                     greeting_text,
@@ -200,15 +200,15 @@ class MainDialog(ComponentDialog):
             # If the call to the booking service was successful tell the user.
             # time_property = Timex(result.travel_date)
             # travel_date_msg = time_property.to_natural_language(datetime.now())
-            msg_txt  = f"I have understood you want to "
+            msg_txt  = f"You have confirmed that you want to "
             msg_txt += f"go to {result.destination} from {result.origin}"
-            msg_txt += f" on {result.travel_date}"
-            msg_txt += f" and your best budget is {result.max_budget['number']}"
+            msg_txt += f" on {result.departure_date} to {result.return_date}."
+            msg_txt += f" Your best budget is {result.max_budget['number']}"
             msg_txt += f" {result.max_budget['units']}."
             message = MessageFactory.text(msg_txt, msg_txt, InputHints.ignoring_input)
             await step_context.context.send_activity(message)
 
-        prompt_message = "What else can I do for you?"
+        prompt_message = "Thsnk you. Have a good day."
         return await step_context.replace_dialog(self.id, prompt_message)
 
     # We do not handle this kind of error.
