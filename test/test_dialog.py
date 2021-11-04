@@ -61,12 +61,12 @@ from fly_me_bot.dialogs.main_dialog import MainDialog, Specifying_dialog
 pytestmark = pytest.mark.asyncio
 
 
-@pytest.fixture(scope="session", autouse=True)
-def load_env():
-    """Load environment values from .env."""
-    load_dotenv(
-        dotenv_path="C:\\Users\\serge\\OneDrive\\Data Sciences\\Data Sciences - Ingenieur IA\\10e projet\\Deliverables"
-    )
+# @pytest.fixture(scope="session", autouse=True)
+# def load_env():
+#     """Load environment values from .env."""
+#     load_dotenv(
+#         dotenv_path="C:\\Users\\serge\\OneDrive\\Data Sciences\\Data Sciences - Ingenieur IA\\10e projet\\Deliverables"
+#     )
 
 
 @pytest.mark.asyncio

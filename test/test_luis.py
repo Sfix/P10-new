@@ -77,11 +77,8 @@ from fly_me_bot.config import DefaultConfig
 
 @pytest.fixture(autouse=True)
 def test_luis_intent_GREETINGS():
-    """Test the non regression of Luis on GREETINGS Intent."""
+    # """Test the non regression of Luis on GREETINGS Intent."""
     # logger.info("Test l'Intent Greetings")
-    # load_dotenv(
-    #     dotenv_path="C:\\Users\\serge\\OneDrive\\Data Sciences\\Data Sciences - Ingenieur IA\\10e projet\\Deliverables"
-    # )
     # logger.info(f"App_id = {os.environ['LuisAppId']}")
 
     # client_runtime = LUISRuntimeClient(
