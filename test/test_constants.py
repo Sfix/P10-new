@@ -4,7 +4,7 @@
 import os
 import logging
 
-from shared_code.constants.files import FILES
+from fly_me_bot.shared_code.constants.files import FILES
 
 
 logger = logging.getLogger("Test")
