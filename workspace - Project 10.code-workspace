@@ -1,8 +1,12 @@
 {
 	"folders": [
-		{
-			"path": "."
-		}
+        {
+            "path": "."
+        },
+        {
+            "name": "fly_me_bot",
+            "path": "fly_me_bot"
+        }
     ],
     "settings": {
         "cSpell.words": [

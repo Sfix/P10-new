@@ -1,5 +1,6 @@
-.git
-.pytest_cache
+**/.git
+**/.github
+**/.pytest_cache
 .venv
 .vscode
 .data/frames
